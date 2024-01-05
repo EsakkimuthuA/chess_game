@@ -7,6 +7,7 @@ import 'package:chess_game/user/current_user.dart';
 import 'package:chess_game/user/user_preference.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'engine/game_logic.dart';
 import 'engine/home_screen_button.dart';
@@ -33,6 +34,18 @@ class SettingPage extends StatefulWidget {
 
 class _SettingPageState extends State<SettingPage> {
   final CurrentUser _currentUser = Get.put(CurrentUser());
+  late SharedPreferences prefs;
+
+
+  @override
+  void initState() {
+    super.initState();
+    initPrefs();
+  }
+
+  Future<void> initPrefs() async {
+    prefs = await SharedPreferences.getInstance();
+  }
   List<User> users=[
     const User(username: 'SignUp',icon: Icons.person),
     const User(username: 'Home',icon: Icons.home),
@@ -193,7 +206,22 @@ class _SettingPageState extends State<SettingPage> {
 
             ),
             Text(_currentUser.users.email,style: TextStyle(color: Colors.white),),
-              Text(_currentUser.users.name,style: TextStyle(color: Colors.white),)
+              Text(_currentUser.users.name,style: TextStyle(color: Colors.white),),
+           // String sessionToken = prefs.getString('sessionToken') ?? '';
+              FutureBuilder(
+                future: initPrefs(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.done) {
+                    String sessionToken = prefs.getString('sessionToken') ?? '';
+                    return Text(
+                      'Session Token: $sessionToken',
+                      style: TextStyle(color: Colors.white),
+                    );
+                  } else {
+                    return CircularProgressIndicator(); // You can replace this with a loading indicator.
+                  }
+                },
+              ),
           ],
                 ),
         ),
