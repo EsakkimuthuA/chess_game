@@ -1,6 +1,7 @@
 
 import  'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import 'dart:convert';
 import '../user/users.dart';
@@ -38,6 +39,8 @@ Future<Users?>validate(
         );*/
       }else{
         var sessionToken = generateUniqueToken();
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        prefs.setString('sessionToken', sessionToken);
         var uri = Uri.parse('https://leadproduct.000webhostapp.com/chessApi/signup.php');
         var response = await http.post(uri, body: {
           "name": name,
@@ -66,6 +69,8 @@ Future<Users?>validate(
       }
     } else{
       var sessionToken = generateUniqueToken();
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs.setString('sessionToken', sessionToken);
       var uri = Uri.parse('https://leadproduct.000webhostapp.com/chessApi/signup.php');
       var response = await http.post(uri, body: {
         "name": name,
