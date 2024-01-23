@@ -176,21 +176,21 @@ class _SettingPageState extends State<SettingPage> {
               //     },
               //   color: Colors.blueAccent,
               //   child: Text('phone number login'),),
-            HomeScreenButton(
-              text: "Resume",
-              minWidth: minWidth,
-              onPressed: (context) {
-                Navigator.pushNamed(context, '/resume');
-              }
-            ),
-            //   MaterialButton(
-            //     child: Text("Start Game"),
-            //     color: Colors.blue,
-            //     textColor: Colors.white,
-            //     onPressed: () {
-            //       Navigator.push(context, MaterialPageRoute(builder: (context)=>ChessTimerScreen()));
-            //     },
-            //   ),
+            // HomeScreenButton(
+            //   text: "Resume",
+            //   minWidth: minWidth,
+            //   onPressed: (context) {
+            //     Navigator.pushNamed(context, '/resume');
+            //   }
+            // ),
+              MaterialButton(
+                child: Text("Start Game"),
+                color: Colors.blue,
+                textColor: Colors.white,
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context)=>TimerOptionPage()));
+                },
+              ),
               // MaterialButton(
               //   child: Text("Start Game"),
               //   color: Colors.blue,
@@ -224,60 +224,61 @@ class _SettingPageState extends State<SettingPage> {
                   }
                 },
               ),
-          FutureBuilder(
-            future: fetchData(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return CircularProgressIndicator();
-              } else if (snapshot.hasError) {
-                return Text('Error: ${snapshot.error}',style: TextStyle(color: Colors.white));
-              } else {
-                // Display the data in a ListView
-                return ListView.builder(
-                  itemCount: snapshot.data!.length,
-                  itemBuilder: (context, index) {
-                    return ListTile(
-                      title: Text(snapshot.data![index]['your_column_name'],style: TextStyle(color: Colors.white),),
-                    );
-                  },
-                );
-              }
-            },
-      )
+      //     FutureBuilder(
+      //       future: fetchData(),
+      //       builder: (context, snapshot) {
+      //         if (snapshot.connectionState == ConnectionState.waiting) {
+      //           return CircularProgressIndicator();
+      //         } else if (snapshot.hasError) {
+      //           return Text('Error: ${snapshot.error}',style: TextStyle(color: Colors.white));
+      //         } else {
+      //           // Display the data in a ListView
+      //           return ListView.builder(
+      //             itemCount: snapshot.data!.length,
+      //             itemBuilder: (context, index) {
+      //               return ListTile(
+      //                 title: Text(snapshot.data![index]['your_column_name'],style: TextStyle(color: Colors.white),),
+      //               );
+      //             },
+      //           );
+      //         }
+      //       },
+      // )
           ],
                 ),
         ),
       )
     );
   }
-  Future<List<Map<String, dynamic>>> fetchData() async {
-    final response = await http.post(
-      Uri.parse('https://leadproduct.000webhostapp.com/chessApi/session_token'),
-      body: {'email': 'user@example.com', 'password': 'password'},
-    );
+  // Future<List<Map<String, dynamic>>> fetchData() async {
+  //   final response = await http.post(
+  //     Uri.parse('https://leadproduct.000webhostapp.com/chessApi/session_token'),
+  //     body: {'email': 'user@example.com', 'password': 'password'},
+  //   );
+  //
+  //   if (response.statusCode == 200) {
+  //     // Parse the JSON response
+  //     Map<String, dynamic> responseData = json.decode(response.body);
+  //
+  //     // Store the session token in local storage
+  //     saveSessionTokenLocally(responseData['sessionToken']);
+  //
+  //     return responseData['userData'];
+  //   } else {
+  //     // If the server did not return a 200 OK response,
+  //     // throw an exception.
+  //     throw Exception('Failed to load data');
+  //   }
+  // }
+  //
+  // Future<void> saveSessionTokenLocally(String sessionToken) async {
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   prefs.setString('sessionToken', sessionToken);
+  // }
+  //
+  // Future<String?> getSessionToken() async {
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   return prefs.getString('sessionToken');
+  // }
 
-    if (response.statusCode == 200) {
-      // Parse the JSON response
-      Map<String, dynamic> responseData = json.decode(response.body);
-
-      // Store the session token in local storage
-      saveSessionTokenLocally(responseData['sessionToken']);
-
-      return responseData['userData'];
-    } else {
-      // If the server did not return a 200 OK response,
-      // throw an exception.
-      throw Exception('Failed to load data');
-    }
-  }
-
-  Future<void> saveSessionTokenLocally(String sessionToken) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setString('sessionToken', sessionToken);
-  }
-
-  Future<String?> getSessionToken() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getString('sessionToken');
-  }
 }

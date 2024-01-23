@@ -162,10 +162,10 @@ class _PlayLocalState extends State<PlayLocal> {
                               //borderColor: color.navy,
                               // blurColor: color.beige2,
                               onTap: () {
-                               // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>TimerOption()));
+                                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> TimerOptionPage()));
                                 // _textController1;_textController2;
-                                logic.args.isMultiplayer = true;
-                                Navigator.pushNamed(context, '/color');
+                                // logic.args.isMultiplayer = true;
+                                // Navigator.pushNamed(context, '/color');
                                 //  EmojiAlert(
                                 //   //alertTitle:  Text("Player1 vs Player2", style:  TextStyle(fontWeight:  FontWeight.bold)),
                                 //    enableMainButton: true,

@@ -38,7 +38,7 @@ class ChooseColorScreen extends StatelessWidget {
                           child: PieceWidget(piece: Piece(PieceType.KING, PieceColor.BLACK))
                         ),
                         onTap: () {
-                         // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>TimerOption()));
+                         // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>TimerOptionPage()));
                            logic.args.asBlack = true;
                           Navigator.pushNamed(context, '/game');
                           logic.start();
@@ -53,7 +53,8 @@ class ChooseColorScreen extends StatelessWidget {
                           child: PieceWidget(piece: Piece(PieceType.KING, PieceColor.WHITE))
                         ),
                         onTap: () {
-                          logic.args.asBlack = false;
+                         // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>TimerOptionPage()));
+                           logic.args.asBlack = false;
                           Navigator.pushNamed(context, '/game');
                           logic.start();
                         }
@@ -69,54 +70,70 @@ class ChooseColorScreen extends StatelessWidget {
   }
 }
 
-
-class TimerOption extends StatefulWidget {
-  const TimerOption({super.key});
+class TimerOptionPage extends StatefulWidget {
+  const TimerOptionPage({super.key});
 
   @override
-  State<TimerOption> createState() => _TimerOptionState();
+  _TimerOptionPageState createState() => _TimerOptionPageState();
 }
 
-class _TimerOptionState extends State<TimerOption> {
-  int selectedTime = 0;
+class _TimerOptionPageState extends State<TimerOptionPage> {
+  int selectedTime = 1; // Initial value, you can change it as needed
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: color.navy1,
-      body: Column(
-        children: [
-          SizedBox(height: 100,),
-          DropdownButton<int>(
-            value: selectedTime,
-            onChanged: (int? value) {
-              if (value != null) {
+      appBar: AppBar(
+        title: Text('Select Timer',style: TextStyle(color: Colors.white),),
+        backgroundColor: color.navy1,
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('Select Timer Duration: $selectedTime minutes',
+              style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 20),),
+            SizedBox(height: 50,),
+            Slider(
+              value: selectedTime.toDouble(),
+              min: 1,
+              max: 60,
+              inactiveColor: Colors.orange,
+              activeColor: Colors.purple,
+              divisions: 59,
+              onChanged: (value) {
                 setState(() {
-                  selectedTime = value;
+                  selectedTime = value.toInt();
                   logic.updateTimers(Duration(minutes: selectedTime));
                 });
-              }
-            },
-            // onTap: (){
-            //   logic.args.asBlack = true;
-            //   Navigator.pushNamed(context, '/game');
-            //   logic.start();
-            // },
-            dropdownColor: Colors.blue,
-            iconEnabledColor: Colors.blue,
-            items: [0,5, 10, 15, 20, 30].map((int value) {
-              return DropdownMenuItem<int>(
-                value: value,
-                child: GestureDetector(
-                    onTap: (){
-                      logic.args.isMultiplayer = true;
-                      Navigator.pushNamed(context, '/color');
-                    },
-                    child: Text('$value minutes',style: TextStyle(color: Colors.white),)),
-
-              );
-            }).toList(),
-          ),
-        ],
+              },
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('0'  ,style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 20),),
+                Text('60',  style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 20),),
+              ],
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context, selectedTime);
+                 logic.args.isMultiplayer = true;
+                 Navigator.pushNamed(context, '/color');
+              },
+              child: Text('Start Game'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context, selectedTime);
+                logic.args.isMultiplayer = true;
+                Navigator.pushNamed(context, '/color2');
+              },
+              child: Text('not time Start Game'),
+            ),
+          ],
+        ),
       ),
     );
   }

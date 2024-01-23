@@ -9,9 +9,11 @@ import 'package:flutter/services.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:get_it/get_it.dart';
 import 'engine/choose_color_screen.dart';
+import 'engine/choose_color_screen2.dart';
 import 'engine/choose_difficulty_screen.dart';
 import 'engine/game_logic.dart';
 import 'engine/game_screen.dart';
+import 'engine/game_screen2.dart';
 import 'engine/resume_screen.dart';
 import 'engine/timer.dart';
 import 'firebase_options.dart';
@@ -93,6 +95,8 @@ class MyApp extends StatelessWidget {
                '/resume': (context) => const ResumeScreen(),
                '/game': (context) => const GameScreen(),
                "/clock":(context)=>  const ClockWidget(),
+               '/color2': (context) => const ChooseColorScreen2(),
+               '/game2': (context) => const GameScreen2(),
              }
         // routes: {
         // "/Play Local":(context)=>PlayLocal(),

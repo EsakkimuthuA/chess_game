@@ -22,7 +22,6 @@ class GameScreen extends StatefulWidget {
 }
 
 class _GameScreenState extends State<GameScreen> {
-  //GameLogic logic = GameLogicImplementation();
   void update() => setState(() => {});
   @override
   void initState() {
@@ -37,11 +36,6 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   int selectedTime = 1;
-  // Widget _buildTimers() {
-  //   if (logic.player1Timer.currentTime.inSeconds <= 0 || logic.player2Timer.currentTime.inSeconds <= 0) {
-  //     _endGame(logic.turn());
-  //
-  //   }
   bool isDialogShown = false;
 
   Widget _buildTimers() {
@@ -50,36 +44,49 @@ class _GameScreenState extends State<GameScreen> {
       isDialogShown = true;
       _endGame(logic.turn());
     }
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Column(
       children: [
-        Text(
-          'Player 1: ${logic.player1Timer.currentTime.inMinutes}:${(logic.player1Timer.currentTime.inSeconds % 60).toString().padLeft(2, '0')}',
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold,color: Colors.white),
-        ),
-        Text(
-          'Player 2: ${logic.player2Timer.currentTime.inMinutes}:${(logic.player2Timer.currentTime.inSeconds % 60).toString().padLeft(2, '0')}',
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold,color: Colors.white),
-        ),
-        DropdownButton<int>(
-          value: selectedTime,
-          onChanged: (int? value) {
-            if (value != null) {
-              setState(() {
-                selectedTime = value;
-                logic.updateTimers(Duration(minutes: selectedTime));
-              });
-            }
-          },
-         dropdownColor: Colors.blue,
-          iconEnabledColor: Colors.white,
-          items: [1,0,5, 10, 15, 20, 30].map((int value) {
-            return DropdownMenuItem<int>(
-              value: value,
-              child: Text('$value minutes',style: TextStyle(color: Colors.white),),
-            );
-          }).toList(),
-        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Player 1: ${logic.player1Timer.currentTime.inMinutes}:${(logic.player1Timer.currentTime.inSeconds % 60).toString().padLeft(2, '0')}',
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold,color: Colors.white),
+            ),
+            Text(
+              'Player 2: ${logic.player2Timer.currentTime.inMinutes}:${(logic.player2Timer.currentTime.inSeconds % 60).toString().padLeft(2, '0')}',
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold,color: Colors.white),
+            ),
+        //     DropdownButton<int>(
+        //       value: selectedTime,
+        //       onChanged: (int? value) {
+        //         if (value != null) {
+        //           setState(() {
+        //             selectedTime = value;
+        //             logic.updateTimers(Duration(minutes: selectedTime));
+        //           });
+        //         }
+        //       },
+        //      dropdownColor: Colors.blue,
+        //       iconEnabledColor: Colors.white,
+        //       items: [1,0,5, 10, 15, 20, 30].map((int value) {
+        //         return DropdownMenuItem<int>(
+        //           value: value,
+        //           child: Text('$value minutes',style: TextStyle(color: Colors.white),),
+        //         );
+        //       }).toList(),
+        //     ),
+           ],
+         ),
+        // GestureDetector(
+        //   onTap: (){
+        //     Navigator.push(context, MaterialPageRoute(builder: (context)=> TimerOptionPage()));
+        //   },
+        //   child: Container(
+        //       height: 20,
+        //       width: 50,
+        //       child: Text('button',style: TextStyle(color: Colors.white),)),
+        //)
       ],
     );
   }
@@ -103,17 +110,19 @@ class _GameScreenState extends State<GameScreen> {
       ],
     );
   }
-
+  bool isPromotionDialogShown = false;
+  bool showEndDialog =false;
   @override
   Widget build(BuildContext context) {
     final mainPlayerColor = logic.args.asBlack ? PieceColor.BLACK : PieceColor.WHITE;
     final secondPlayerColor = logic.args.asBlack ? PieceColor.WHITE : PieceColor.BLACK;
 
     bool isMainTurn = mainPlayerColor == logic.turn();
-    if (logic.isPromotion && (logic.args.isMultiplayer || isMainTurn)) {
-      Timer(const Duration(milliseconds: 100), () => _showPromotionDialog(context));
-    } else if (logic.gameOver()) {
-      print('Game is over');
+    if (logic.isPromotion && (logic.args.isMultiplayer || isMainTurn) && !isPromotionDialogShown) {
+      isPromotionDialogShown = true;
+      Timer(const Duration(milliseconds: 10), () => _showPromotionDialog(context));
+    } else if (logic.gameOver() && !showEndDialog) {
+      showEndDialog =true;
       Timer(const Duration(milliseconds: 500), () => _showEndDialog(context));
     }
 
@@ -300,10 +309,12 @@ class _GameScreenState extends State<GameScreen> {
                 onPressed: () {
                   logic.clear();
                   Navigator.popUntil(context, (route) => route.isFirst);
+                  showEndDialog =false;
                 },
                 child: const Text("Exit"),
               )
             ]));
+       // showEndDialog =false;
   }
 
   void _showPromotionDialog(BuildContext context) {
@@ -333,6 +344,11 @@ class _GameScreenState extends State<GameScreen> {
                               child: PieceWidget(piece: piece)
                             )))
                           .toList())));
-    futureValue.then((piece) => logic.promote(piece));
+   // futureValue.then((piece) => logic.promote(piece));
+    futureValue.then((piece) {
+      logic.promote(piece);
+      isPromotionDialogShown = false; // Reset the flag
+    });
+
   }
 }
