@@ -68,6 +68,9 @@ dependencies:
   timer_builder: ^2.0.0
   uuid: ^3.0.0
   fluttertoast: ^8.2.4
+  image_picker: ^0.8.4
+  camera: ^0.10.5+9
+  provider: ^6.1.1
 
 flutter_icons:
   android: "launcher_icon"

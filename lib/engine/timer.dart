@@ -9,7 +9,51 @@ import 'package:timer_builder/timer_builder.dart';
 
 import 'chess_board.dart';
 
+class TimerOptionPage extends StatefulWidget {
+  const TimerOptionPage({super.key});
 
+  @override
+  _TimerOptionPageState createState() => _TimerOptionPageState();
+}
+
+class _TimerOptionPageState extends State<TimerOptionPage> {
+  int selectedTime = 1; // Initial value, you can change it as needed
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Select Timer'),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('Select Timer Duration: $selectedTime minutes'),
+            Slider(
+              value: selectedTime.toDouble(),
+              min: 1,
+              max: 60,
+              divisions: 59,
+              onChanged: (value) {
+                setState(() {
+                  selectedTime = value.toInt();
+                  logic.updateTimers(Duration(minutes: selectedTime));
+                });
+              },
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context, selectedTime);
+              },
+              child: Text('Start Game'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
 
 class TimeLimitPicker extends StatelessWidget {

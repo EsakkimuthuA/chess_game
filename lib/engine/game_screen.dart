@@ -1,5 +1,6 @@
 import 'package:chess_game/colors.dart';
 import 'package:chess_game/engine/timer.dart';
+import 'package:chess_game/screen/home_screen.dart';
 
 import '../games/play_local.dart';
 import 'piece_widget.dart';
@@ -22,7 +23,6 @@ class GameScreen extends StatefulWidget {
 }
 
 class _GameScreenState extends State<GameScreen> {
-  //GameLogic logic = GameLogicImplementation();
   void update() => setState(() => {});
   @override
   void initState() {
@@ -37,11 +37,6 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   int selectedTime = 1;
-  // Widget _buildTimers() {
-  //   if (logic.player1Timer.currentTime.inSeconds <= 0 || logic.player2Timer.currentTime.inSeconds <= 0) {
-  //     _endGame(logic.turn());
-  //
-  //   }
   bool isDialogShown = false;
 
   Widget _buildTimers() {
@@ -50,35 +45,78 @@ class _GameScreenState extends State<GameScreen> {
       isDialogShown = true;
       _endGame(logic.turn());
     }
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Column(
       children: [
-        Text(
-          'Player 1: ${logic.player1Timer.currentTime.inMinutes}:${(logic.player1Timer.currentTime.inSeconds % 60).toString().padLeft(2, '0')}',
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold,color: Colors.white),
-        ),
-        Text(
-          'Player 2: ${logic.player2Timer.currentTime.inMinutes}:${(logic.player2Timer.currentTime.inSeconds % 60).toString().padLeft(2, '0')}',
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold,color: Colors.white),
-        ),
-        DropdownButton<int>(
-          value: selectedTime,
-          onChanged: (int? value) {
-            if (value != null) {
-              setState(() {
-                selectedTime = value;
-                logic.updateTimers(Duration(minutes: selectedTime));
-              });
-            }
-          },
-         dropdownColor: Colors.blue,
-          iconEnabledColor: Colors.white,
-          items: [1,0,5, 10, 15, 20, 30].map((int value) {
-            return DropdownMenuItem<int>(
-              value: value,
-              child: Text('$value minutes',style: TextStyle(color: Colors.white),),
-            );
-          }).toList(),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            RotatedBox(
+              quarterTurns: 2,
+              child: Text(
+                'White: ${logic.player1Timer.currentTime.inMinutes}:${(logic.player1Timer.currentTime.inSeconds % 60).toString().padLeft(2, '0')}',
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold,color: Colors.white),
+              ),
+            ),
+            RotatedBox(
+              quarterTurns: 2,
+              child: Text(
+                'Black: ${logic.player2Timer.currentTime.inMinutes}:${(logic.player2Timer.currentTime.inSeconds % 60).toString().padLeft(2, '0')}',
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold,color: Colors.white),
+              ),
+            ),
+        //     DropdownButton<int>(
+        //       value: selectedTime,
+        //       onChanged: (int? value) {
+        //         if (value != null) {
+        //           setState(() {
+        //             selectedTime = value;
+        //             logic.updateTimers(Duration(minutes: selectedTime));
+        //           });
+        //         }
+        //       },
+        //      dropdownColor: Colors.blue,
+        //       iconEnabledColor: Colors.white,
+        //       items: [1,0,5, 10, 15, 20, 30].map((int value) {
+        //         return DropdownMenuItem<int>(
+        //           value: value,
+        //           child: Text('$value minutes',style: TextStyle(color: Colors.white),),
+        //         );
+        //       }).toList(),
+        //     ),
+           ],
+         ),
+        // GestureDetector(
+        //   onTap: (){
+        //     Navigator.push(context, MaterialPageRoute(builder: (context)=> TimerOptionPage()));
+        //   },
+        //   child: Container(
+        //       height: 20,
+        //       width: 50,
+        //       child: Text('button',style: TextStyle(color: Colors.white),)),
+        //)
+      ],
+    );
+  }
+  Widget _buildTimers2() {
+    if (!isDialogShown &&
+        (logic.player1Timer.currentTime.inSeconds <= 0 || logic.player2Timer.currentTime.inSeconds <= 0)) {
+      isDialogShown = true;
+      _endGame(logic.turn());
+    }
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Player 1: ${logic.player1Timer.currentTime.inMinutes}:${(logic.player1Timer.currentTime.inSeconds % 60).toString().padLeft(2, '0')}',
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold,color: Colors.white),
+            ),
+            Text(
+              'Player 2: ${logic.player2Timer.currentTime.inMinutes}:${(logic.player2Timer.currentTime.inSeconds % 60).toString().padLeft(2, '0')}',
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold,color: Colors.white),
+            ),
+          ],
         ),
       ],
     );
@@ -103,17 +141,41 @@ class _GameScreenState extends State<GameScreen> {
       ],
     );
   }
-
+  Widget _buildMultiplayerBar2(bool isMe, PieceColor color) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Flexible(
+            flex: 7,
+            child: RotatedBox(
+                quarterTurns: 2,
+                child: PlayerBar(isMe, color))
+        ),
+        // const Spacer(flex: 2),
+        //  Flexible(
+        //      flex: 7,
+        //      child: RotatedBox(
+        //          quarterTurns: 2,
+        //          child: PlayerBar(!isMe, color)
+        //      )
+        //  ),
+      ],
+    );
+  }
+  bool isPromotionDialogShown = false;
+  bool showEndDialog =false;
   @override
   Widget build(BuildContext context) {
     final mainPlayerColor = logic.args.asBlack ? PieceColor.BLACK : PieceColor.WHITE;
     final secondPlayerColor = logic.args.asBlack ? PieceColor.WHITE : PieceColor.BLACK;
 
     bool isMainTurn = mainPlayerColor == logic.turn();
-    if (logic.isPromotion && (logic.args.isMultiplayer || isMainTurn)) {
-      Timer(const Duration(milliseconds: 100), () => _showPromotionDialog(context));
-    } else if (logic.gameOver()) {
-      print('Game is over');
+    if (logic.isPromotion && (logic.args.isMultiplayer || isMainTurn) && !isPromotionDialogShown) {
+      isPromotionDialogShown = true;
+      Timer(const Duration(milliseconds: 10), () => _showPromotionDialog(context));
+    } else if (logic.gameOver() && !showEndDialog) {
+      showEndDialog =true;
       Timer(const Duration(milliseconds: 500), () => _showEndDialog(context));
     }
 
@@ -159,19 +221,19 @@ class _GameScreenState extends State<GameScreen> {
             ),
             _buildTimers(),
             Container(
-              height: 180, // Set your desired height
+              height: 100, // Set your desired height
               width: double.infinity,
               child: Align(
                 alignment: Alignment.bottomCenter,
                 child: logic.args.isMultiplayer
-                    ? _buildMultiplayerBar(true, mainPlayerColor) //change the secondPlayerColor to MainPlayerColor
+                    ? _buildMultiplayerBar2(true, mainPlayerColor) //change the secondPlayerColor to MainPlayerColor
                     : PlayerBar(false, secondPlayerColor),
               ),
             ),
             // ignore: prefer_const_constructors
             ChessBoard(),
             Container(
-              height: 180, // Set your desired height
+              height: 100, // Set your desired height
               width: double.infinity,
               child: Align(
                 alignment: Alignment.topCenter,
@@ -180,6 +242,7 @@ class _GameScreenState extends State<GameScreen> {
                     : PlayerBar(true, mainPlayerColor),
               ),
             ),
+            _buildTimers2()
           ],
         ),
       ),
@@ -241,8 +304,8 @@ class _GameScreenState extends State<GameScreen> {
             TextButton(
               onPressed: () {
                 logic.clear();
-                Navigator.popUntil(context, (route) => route.isFirst);
-               // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>PlayLocal()));
+               // Navigator.popUntil(context, (route) => route.isFirst);
+                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>HomeScreen()));
                //  final game = logic.save();
                //  logic.clear();
                //  Navigator.popUntil(context, (route) => route.isFirst);
@@ -299,11 +362,14 @@ class _GameScreenState extends State<GameScreen> {
               TextButton(
                 onPressed: () {
                   logic.clear();
-                  Navigator.popUntil(context, (route) => route.isFirst);
+                //  Navigator.popUntil(context, (route) => route.isFirst);
+                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>HomeScreen()));
+                  showEndDialog =false;
                 },
                 child: const Text("Exit"),
               )
             ]));
+       // showEndDialog =false;
   }
 
   void _showPromotionDialog(BuildContext context) {
@@ -333,6 +399,11 @@ class _GameScreenState extends State<GameScreen> {
                               child: PieceWidget(piece: piece)
                             )))
                           .toList())));
-    futureValue.then((piece) => logic.promote(piece));
+   // futureValue.then((piece) => logic.promote(piece));
+    futureValue.then((piece) {
+      logic.promote(piece);
+      isPromotionDialogShown = false; // Reset the flag
+    });
+
   }
 }

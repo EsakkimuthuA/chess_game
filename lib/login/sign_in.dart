@@ -37,6 +37,10 @@ class _SignInState extends State<SignIn> {
   var emailController = TextEditingController();
   var passwordController = TextEditingController();
 
+  Future<void> saveSessionTokenLocally(String sessionToken) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString('sessionToken', sessionToken);
+  }
 
 
   Future<Map<String, dynamic>?> loginUser(String email,String password) async {
@@ -59,6 +63,10 @@ class _SignInState extends State<SignIn> {
         if (responseData['success'] == true) {
           // User data retrieval was successful
           final userData = responseData['userData'];
+          final sessionToken = responseData['sessionToken'];
+
+          // Store the session token locally
+          await saveSessionTokenLocally(sessionToken);
 
           Users userInfo = Users.fromJson(responseData["userData"]);
           await RememberUserPrefs.storeUserInfo(userInfo);
@@ -101,6 +109,16 @@ class _SignInState extends State<SignIn> {
       // Handle any exceptions or errors that occur during the HTTP request.
       print('Error: Email Error : $e');
     }
+    // Future<void> saveSessionTokenLocally(String sessionToken) async {
+    //   SharedPreferences prefs = await SharedPreferences.getInstance();
+    //   prefs.setString('sessionToken', sessionToken);
+    // }
+    //
+    // Future<String?> getSessionToken() async {
+    //   SharedPreferences prefs = await SharedPreferences.getInstance();
+    //   return prefs.getString('sessionToken');
+    // }
+
   }
 
   @override

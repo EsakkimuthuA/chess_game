@@ -49,9 +49,6 @@ class ChessTimer {
 
 abstract class GameLogic extends ChangeNotifier {
 
-  //BuildContext context; // Add this line
-  //GameLogic(this.context); // Add this constructor
-
   ChessTimer get player1Timer;
   ChessTimer get player2Timer;
   String? get selectedTile;
@@ -59,6 +56,7 @@ abstract class GameLogic extends ChangeNotifier {
   List<PieceType> get eatenBlack;
   List<PieceType> get eatenWhite;
   Map<String, String>? get previousMove; // 'from' and 'to' keys that point to positions on the board
+
   GameArguments args=GameArguments(asBlack: false, isMultiplayer: false);
   void updateTimers(Duration newTime);
   void maybeCallAI();
@@ -93,7 +91,7 @@ class GameLogicImplementation extends GameLogic {
       : _player1Timer = ChessTimer(const Duration(minutes: 1)),
         _player2Timer = ChessTimer(const Duration(minutes: 1)) {
     chessHistory.add(chess.fen);
-   // _player1Timer.start(_onTimerTick, _onTimerFinished);
+    _player1Timer.start(_onTimerTick, _onTimerFinished);
   }
   @override
   ChessTimer get player1Timer => _player1Timer; // Update here
@@ -113,8 +111,6 @@ class GameLogicImplementation extends GameLogic {
   bool canUndo() => chessHistory.length > 1;
   @override
   bool canRedo() => chessRedoStack.isNotEmpty;
-  @override
-  @override
   @override
   void undo() {
     if (canUndo()) {
@@ -305,17 +301,18 @@ class GameLogicImplementation extends GameLogic {
     }
     promotionMove = null;
     notifyListeners();
+
   }
 
   void makeMove(String fromInd, String toInd) {
     final move = {'from': fromInd, 'to': toInd};
     bool isValid = _move(move);
-    if (!isValid &&
-        chess.move({'from': fromInd, 'to': toInd, 'promotion': 'q'})) {
+    if (!isValid && chess.move({'from': fromInd, 'to': toInd, 'promotion': 'q'})) {
       chess.undo();
       promotionMove = move;
     } else if (promotionMove != null) {
       promotionMove = null;
+      return;
     }
   }
 
@@ -407,70 +404,3 @@ class GameLogicImplementation extends GameLogic {
     maybeCallAI();
   }
 }
-
-
-//
-// void _onTimerFinished() {
-//   // Callback when the timer finishes
-//
-//   // Implement logic for handling timer finish
-//   if (gameOver()) {
-//     // The game is already over, no need to switch turns or take other actions.
-//
-//     return;
-//   }
-//
-//   // Optionally, you can end the game or switch turns based on your requirements.
-//   if (_player1Timer.currentTime <= Duration.zero) {
-//     // Player 1's time ran out.
-//     _endGame(context, PieceColor.WHITE);
-//     Fluttertoast.showToast(
-//         msg: 'player2 win',
-//         toastLength: Toast.LENGTH_SHORT,
-//         gravity: ToastGravity.CENTER,
-//         backgroundColor: Colors.red,
-//         textColor: Colors.white,
-//         timeInSecForIosWeb: 1
-//     );
-//     print('player2 win');
-//   } else if (_player2Timer.currentTime <= Duration.zero) {
-//     // Player 2's time ran out.
-//     _endGame(context, PieceColor.BLACK);
-//     Fluttertoast.showToast(
-//         msg: 'player1 win',
-//         toastLength: Toast.LENGTH_SHORT,
-//         gravity: ToastGravity.CENTER,
-//         backgroundColor: Colors.red,
-//         textColor: Colors.white,
-//         timeInSecForIosWeb: 1
-//     );
-//     print('player1 win');
-//   } else {
-//     // Switch turns and start the timer for the next player.
-//     switchTurns();
-//     _startTimerForCurrentPlayer();
-//   }
-//
-//   notifyListeners();
-// }
-//
-// void _endGame(BuildContext context, PieceColor winner) {
-//   // Implement logic for ending the game
-//   // For example, you can show a dialog or update the game state accordingly.
-//   showDialog(
-//     context: context,
-//     builder: (BuildContext context) => AlertDialog(
-//       title: Text("Game Over"),
-//       content: Text("Player ${winner == PieceColor.WHITE ? 1 : 2} wins!"),
-//       actions: [
-//         TextButton(
-//           onPressed: () {
-//             Navigator.of(context).pop();
-//             clear(); // Clear the game state.
-//           },
-//           child: Text("OK"),
-//         ),
-//       ],
-//     ),
-//   );
-// }

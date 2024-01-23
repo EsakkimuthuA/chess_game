@@ -1,4 +1,5 @@
 
+import 'package:chess_game/setting_page.dart';
 import 'package:chess_game/splash_screen.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
@@ -8,20 +9,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:get_it/get_it.dart';
+import 'package:provider/provider.dart';
 import 'engine/choose_color_screen.dart';
+import 'engine/choose_color_screen2.dart';
 import 'engine/choose_difficulty_screen.dart';
 import 'engine/game_logic.dart';
 import 'engine/game_screen.dart';
+import 'engine/game_screen2.dart';
 import 'engine/resume_screen.dart';
 import 'engine/timer.dart';
 import 'firebase_options.dart';
+import 'package:camera/camera.dart';
+
 const kWebRecaptchaSiteKey = "AIzaSyBYsklEXh8FvrcDuxX1c6GzwKz3SmSZuo4";
     //'AIzaSyAlQloKdaZyZ07q653fAWogE1swGdohGzA';
-void main() async{
+List<CameraDescription> cameras = [];
+Future<void> main() async {
 
   GetIt.instance.registerSingleton<GameLogic>(GameLogicImplementation(), signalsReady: true);
 
   WidgetsFlutterBinding.ensureInitialized();
+  cameras = await availableCameras();
   SystemChrome.setPreferredOrientations(
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]
   );
@@ -41,27 +49,17 @@ void main() async{
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     statusBarColor: Colors.black,
   ));
-  runApp( MyApp(),
-    // ChangeNotifierProvider(
-    //   create: (context) => AppModel(),
-    //   child: MyApp(),
-    // ),
+
+  runApp(
+    //MyApp(),
+    ChangeNotifierProvider(
+      create: (context) => ProfileProvider(),
+      child: MyApp(),
+    ),
   );
 //  _loadFlameAssets();
 }
-//
-// void _loadFlameAssets() async {
-//   List<String> pieceImages = [];
-//   for (var theme in PIECE_THEMES) {
-//     for (var color in ['black', 'white']) {
-//       for (var piece in ['king', 'queen', 'rook', 'bishop', 'knight', 'pawn']) {
-//         pieceImages
-//             .add('pieces/${formatPieceTheme(theme)}/${piece}_$color.png');
-//       }
-//     }
-//   }
-//   await Flame.images.loadAll(pieceImages);
-// }
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -93,6 +91,9 @@ class MyApp extends StatelessWidget {
                '/resume': (context) => const ResumeScreen(),
                '/game': (context) => const GameScreen(),
                "/clock":(context)=>  const ClockWidget(),
+               '/color2': (context) => const ChooseColorScreen2(),
+               '/game2': (context) => const GameScreen2(),
+               '/difficulty2': (context) => const ChooseDifficultyScreen2(),
              }
         // routes: {
         // "/Play Local":(context)=>PlayLocal(),
