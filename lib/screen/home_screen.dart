@@ -1,21 +1,14 @@
 
-
 import 'package:chess_game/screen/Event_screen.dart';
-import 'package:chess_game/screen/home_screen.dart';
 import 'package:chess_game/screen/homepage.dart';
 import 'package:chess_game/screen/shop-screen.dart';
 import 'package:chess_game/screen/watch_screen.dart';
 import 'package:fluid_bottom_nav_bar/fluid_bottom_nav_bar.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:chess_game/colors.dart';
-import 'dart:math' as math;
 import 'package:flutter/material.dart' hide Card;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_state_manager/src/simple/get_state.dart';
-
 import '../user/current_user.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -33,7 +26,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int newIndex = 0;
   Widget? _child;
-  CurrentUser _rememberCurrentUser = Get.put(CurrentUser());//
+  final CurrentUser _rememberCurrentUser = Get.put(CurrentUser());//
 
   @override
   void initState() {

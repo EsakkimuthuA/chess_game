@@ -132,7 +132,7 @@ flutter:
     - assets/play-local2.png
     - assets/play-online2.png
     - assets/friends2.png
-    - assets/profile.png
+    - assets/placeholder_image.png
     - assets/invite.png
     - assets/sky1.jpg
     - assets/king.png
@@ -147,6 +147,7 @@ flutter:
     - assets/images/pieces/classic/
     - images/
     - assets/icon/
+#    - assets/placeholder_image.jpg
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

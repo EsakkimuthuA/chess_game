@@ -1,19 +1,17 @@
 
+import 'dart:convert';
 import 'package:bouncing_widget/bouncing_widget.dart';
-import 'package:button_animations/button_animations.dart';
-import 'package:chess_game/buttons/bounce_button.dart';
-import 'package:chess_game/buttons/fancy_button.dart';
 import 'package:chess_game/cyber/cyber_buttons.dart';
-import 'package:chess_game/cyber/cyber_one.dart';
-import 'package:chess_game/cyber/cyber_two.dart';
-import 'package:chess_game/screen/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colors_border/flutter_colors_border.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:chess_game/colors.dart';
 import 'package:gap/gap.dart';
-
+import 'package:provider/provider.dart';
 import '../setting_page.dart';
+import '../user/current_user.dart';
+import 'package:http/http.dart' as http;
 
 
 class Homepage extends StatefulWidget {
@@ -25,13 +23,34 @@ class Homepage extends StatefulWidget {
 
 class _HomepageState extends State<Homepage> with TickerProviderStateMixin{
   final _key = GlobalKey<ScaffoldState>();
-
   double _scaleFactor = 1.0;
+  final CurrentUser _currentUser = Get.find<CurrentUser>();
+  late Map<String, dynamic> userData = {};
 
+  Future<void> fetchChequeImages() async {
+    var url = Uri.parse('https://leadproduct.000webhostapp.com/chessApi/fetch_profile_picture.php'); // Update with your API endpoint
+    var response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      // If the server returns a 200 OK response, parse the JSON
+      List<dynamic> result = jsonDecode(response.body);
+      print(result); // Output the fetched data
+    } else if (response.statusCode == 404) {
+      print('No Images found');
+    } else {
+      // If the server returns an error response, throw an exception
+      throw Exception('Failed to load cheque images');
+    }
+  }
+
+
+  @override
+  void initState() {
+    super.initState();
+  }
   _onPressed(BuildContext context) {
     print("CLICK");
   }
-
   @override
   Widget build(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height;
@@ -60,15 +79,63 @@ class _HomepageState extends State<Homepage> with TickerProviderStateMixin{
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                 FlutterColorsBorder(
-                      available: true,
-                      size: Size(screenWidth/8,screenHeight/18),
-                      boardRadius: 5,
-                      child:  Center(
-                          child: Icon(Icons.person,color: Colors.white,size: 50,)
-                          //Image(image: AssetImage('assets/profile.png'),),
-                        ),
+                 GestureDetector(
+                   onTap: (){
+                     Navigator.push(context, MaterialPageRoute(builder: (context)=>ProfilePage()));
+                   },
+                   child: FlutterColorsBorder(
+                        available: true,
+                        size: Size(screenWidth/8,screenHeight/18),
+                        boardRadius: 5,
+                      child:Container(
+                        height: 50,
+                        width: 50,
+                        child:
+                        Consumer<ProfileProvider>(
+                          builder: (context, profileProvider, _) {
+                            if (profileProvider.profilePicturePath == null) {
+                              return FadeInImage.assetNetwork(
+                                placeholder: 'assets/placeholder_image.png',
+                                image: 'https://leadproduct.000webhostapp.com/chessApi/cheque/profile_image_${userData['user_id'] ?? ''}.jpg',
+                                fit: BoxFit.cover,
+                                imageErrorBuilder: (context, error, stackTrace) {
+                                  return Image(image: AssetImage('assets/placeholder_image.png'));
+                                },
+                              );
+                            } else {
+                              return Image(image: AssetImage('assets/placeholder_image.png'));
+                            }
+                          },
+                        )
                       ),
+                      // Obx(
+                      //  () => CircleAvatar(
+                      //         radius: 50.0,
+                      //         backgroundImage: NetworkImage('https://leadproduct.000webhostapp.com/chessApi/cheque/profile_image_${_currentUser.getCurrentUserId()}.jpg'),
+                      //       )
+        //               //  ),
+        //               Consumer<ProfileProvider>(
+        //                 builder: (context, profileProvider, _) => profileProvider.profilePicturePath != null
+        //                     ?Text('No image selected.')
+        //                 // Obx(
+        //                 //         () => CircleAvatar(
+        //                 //       radius: 50.0,
+        //                 //       backgroundImage: NetworkImage('https://leadproduct.000webhostapp.com/chessApi/cheque/profile_image_${_currentUser.getCurrentUserId()}.jpg'),
+        //                 //     )
+        //                 // )
+        //                     : Obx(
+        //                      () => CircleAvatar(
+        //              radius: 50.0,
+        //              backgroundImage: NetworkImage('https://leadproduct.000webhostapp.com/chessApi/cheque/profile_image_${_currentUser.getCurrentUserId()}.jpg'),
+        //            )
+        // ),
+        //               ),
+        //                    Center(
+        //                       child: Icon(Icons.person,color: Colors.white,size: 50,)
+        //                       //Image(image: AssetImage('assets/profile.png'),),
+        //                     ),
+                        ),
+                 ),
                  // Icon(Icons.mail,color: Colors.grey,),
                   Container(
                     height: screenHeight/32,

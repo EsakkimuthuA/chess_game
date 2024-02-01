@@ -2,15 +2,11 @@ import 'dart:convert';
 
 import 'package:chess_game/login/sign_up.dart';
 import 'package:chess_game/screen/home_screen.dart';
-import 'package:chess_game/setting_page.dart';
 import 'package:flutter/material.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:chess_game/colors.dart';
-import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../api/signup_api.dart';
 import '../user/user_preference.dart';
 import '../user/users.dart';
 import 'forget_password.dart';
@@ -64,7 +60,7 @@ class _SignInState extends State<SignIn> {
           // User data retrieval was successful
           final userData = responseData['userData'];
           final sessionToken = responseData['sessionToken'];
-
+          await saveUserDataLocally(userData);
           // Store the session token locally
           await saveSessionTokenLocally(sessionToken);
 
@@ -119,6 +115,11 @@ class _SignInState extends State<SignIn> {
     //   return prefs.getString('sessionToken');
     // }
 
+  }
+
+  Future<void> saveUserDataLocally(Map<String, dynamic> userData) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('userData', jsonEncode(userData));
   }
 
   @override

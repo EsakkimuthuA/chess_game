@@ -1,22 +1,14 @@
 
-import 'package:bouncing_widget/bouncing_widget.dart';
 import 'package:button_animations/button_animations.dart';
 import 'package:chess_game/buttons/back_button.dart';
-import 'package:cyber_punk_tool_kit_ui/cyber_punk_tool_kit_ui.dart';
-import 'package:emoji_alert/arrays.dart';
-import 'package:emoji_alert/emoji_alert.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_colors_border/flutter_colors_border.dart';
 import 'package:gap/gap.dart';
 import 'package:chess_game/colors.dart';
 import 'package:get_it/get_it.dart';
 import 'package:glowy_borders/glowy_borders.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../engine/choose_color_screen.dart';
-import '../engine/choose_difficulty_screen.dart';
 import '../engine/game_logic.dart';
-import '../engine/home_screen_button.dart';
+import '../engine/timer.dart';
 
 
 final logic = GetIt.instance<GameLogic>();

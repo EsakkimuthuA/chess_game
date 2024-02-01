@@ -1,17 +1,9 @@
 
 import 'package:anim_search_bar/anim_search_bar.dart';
-import 'package:button_animations/button_animations.dart';
 import 'package:chess_game/buttons/back_button.dart';
-import 'package:chess_game/buttons/bounce_button.dart';
-import 'package:chess_game/buttons/fancy_button.dart';
-import 'package:chess_game/friends-list.dart';
-import 'package:chess_game/screen/home_screen.dart';
-import 'package:chess_game/style/text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:chess_game/colors.dart';
-import 'package:gap/gap.dart';
-import 'package:chess_game/search-bar.dart';
 
 import '../style/create-link.dart';
 
@@ -36,10 +28,10 @@ class PlayFriend extends StatefulWidget {
 class _PlayFriendState extends State<PlayFriend> {
   TextEditingController textController = TextEditingController();
  List<User> users=[
-   const User(username: 'esakki', lastSeen: '2 hour', imageUrl: 'assets/profile.png'),
-   const User(username: 'esakki', lastSeen: '2 hour', imageUrl: 'assets/profile.png'),
-   const User(username: 'esakki', lastSeen: '2 hour', imageUrl: 'assets/profile.png'),
-   const User(username: 'esakki', lastSeen: '2 hour', imageUrl: 'assets/profile.png')
+   const User(username: 'esakki', lastSeen: '2 hour', imageUrl: 'assets/placeholder_image.png'),
+   const User(username: 'esakki', lastSeen: '2 hour', imageUrl: 'assets/placeholder_image.png'),
+   const User(username: 'esakki', lastSeen: '2 hour', imageUrl: 'assets/placeholder_image.png'),
+   const User(username: 'esakki', lastSeen: '2 hour', imageUrl: 'assets/placeholder_image.png')
  ];
    final List friends = [
     'chess',
