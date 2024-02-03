@@ -9,6 +9,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:chess_game/colors.dart';
 import 'package:gap/gap.dart';
 import 'package:provider/provider.dart';
+import '../gift_page.dart';
+import '../profile_page.dart';
 import '../setting_page.dart';
 import '../user/current_user.dart';
 import 'package:http/http.dart' as http;
@@ -248,7 +250,11 @@ class _HomepageState extends State<Homepage> with TickerProviderStateMixin{
                 children: [
                      BouncingWidget(
                       scaleFactor: _scaleFactor,
-                      onPressed: () => _onPressed(context),
+                      onPressed: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (context)=>GiftPage()));
+                      },
+                      
+                     // => _onPressed(context),
                       child:   Padding(
                         padding: EdgeInsets.only(left: screenWidth/13),
                       child:Image(

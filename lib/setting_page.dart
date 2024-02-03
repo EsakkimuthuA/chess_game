@@ -1,179 +1,15 @@
-import 'dart:io';
+
 import 'package:chess_game/colors.dart';
-import 'package:chess_game/login/phone_number_login.dart';
 import 'package:chess_game/login/sign_in.dart';
 import 'package:chess_game/login/sign_up.dart';
+import 'package:chess_game/profile_page.dart';
 import 'package:chess_game/user/current_user.dart';
 import 'package:chess_game/user/user_preference.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import 'engine/game_logic.dart';
-import 'engine/home_screen_button.dart';
-import 'engine/timer.dart';
-import 'package:http/http.dart' as http;
 import 'package:get_it/get_it.dart';
-
-
-class ProfileProvider with ChangeNotifier {
-  String? _profilePicturePath;
-
-  String? get profilePicturePath => _profilePicturePath;
-
-  set profilePicturePath(String? path) {
-    _profilePicturePath = path;
-    notifyListeners();
-  }
-}
-
-class ProfilePage extends StatefulWidget {
-  const ProfilePage({Key? key}) : super(key: key);
-
-  @override
-  _ProfilePageState createState() => _ProfilePageState();
-}
-
-class _ProfilePageState extends State<ProfilePage> {
-  final picker = ImagePicker();
-
-  Future getImageFromCamera(BuildContext context) async {
-    final pickedFile = await picker.getImage(source: ImageSource.camera);
-
-    if (pickedFile != null) {
-      Provider.of<ProfileProvider>(context, listen: false)
-          .profilePicturePath = pickedFile.path;
-    } else {
-      print('No image selected');
-    }
-  }
-
-  Future getImageFromGallery(BuildContext context) async {
-    final pickedFile = await picker.getImage(source: ImageSource.gallery);
-
-    if (pickedFile != null) {
-      Provider.of<ProfileProvider>(context, listen: false)
-          .profilePicturePath = pickedFile.path;
-    } else {
-      print('No image selected');
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Profile Picture'),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Consumer<ProfileProvider>(
-              builder: (context, profileProvider, _) => profileProvider.profilePicturePath == null
-                  ? Text('No image selected.')
-                  : CircleAvatar(
-                radius: 50.0,
-                backgroundImage: FileImage(File(profileProvider.profilePicturePath!)),
-              ),
-            ),
-            SizedBox(height: 20.0),
-            ElevatedButton(
-              onPressed: () => getImageFromCamera(context),
-              child: Text('Take Picture'),
-            ),
-            SizedBox(height: 20.0),
-            ElevatedButton(
-              onPressed: () => getImageFromGallery(context),
-              child: Text('Choose from Gallery'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-
-// class ProfilePage extends StatefulWidget {
-//   const ProfilePage({super.key});
-//
-//   @override
-//   _ProfilePageState createState() => _ProfilePageState();
-// }
-//
-// class _ProfilePageState extends State<ProfilePage> {
-//   File? _image;
-//   final picker = ImagePicker();
-//   String? _profilePicturePath;
-//   Future getImageFromCamera() async {
-//     final pickedFile = await picker.getImage(source: ImageSource.camera);
-//
-//     setState(() {
-//       if (pickedFile != null) {
-//         _image = File(pickedFile.path);
-//         _profilePicturePath = pickedFile.path; // Save path for later use
-//       } else {
-//         print('No image selected');
-//       }
-//     });
-//   }
-//
-//   Future getImageFromGallery() async {
-//     final pickedFile = await picker.getImage(source: ImageSource.gallery);
-//
-//     setState(() {
-//       if (pickedFile != null) {
-//         _image = File(pickedFile.path);
-//         _profilePicturePath = pickedFile.path; // Save path for later use
-//       } else {
-//         print('No image selected');
-//       }
-//     });
-//   }
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: Text('Profile Picture'),
-//       ),
-//       body: Center(
-//         child: Column(
-//           mainAxisAlignment: MainAxisAlignment.center,
-//           children: <Widget>[
-//             _profilePicturePath == null
-//                 ? Text('No image selected.')
-//                 : CircleAvatar(
-//               radius: 50.0,
-//               backgroundImage: FileImage(File(_profilePicturePath!)),
-//             ),
-//             // _image == null
-//             //     ? Text('No image selected.')
-//             //     : Image.file(
-//             //   _image!,
-//             //   height: 100.0,
-//             //   width: 100.0,
-//             // ),
-//             SizedBox(height: 20.0),
-//             ElevatedButton(
-//               onPressed: getImageFromCamera,
-//               child: Text('Take Picture'),
-//             ),
-//             SizedBox(height: 20.0),
-//             ElevatedButton(
-//               onPressed: getImageFromGallery,
-//               child: Text('Choose from Gallery'),
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }
-
 
 final logic = GetIt.instance<GameLogic>();
 class User {
@@ -382,6 +218,7 @@ class _SettingPageState extends State<SettingPage> {
                   }
                 },
               ),
+
       //     FutureBuilder(
       //       future: fetchData(),
       //       builder: (context, snapshot) {

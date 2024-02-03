@@ -1,10 +1,12 @@
 
+import 'package:admob_flutter/admob_flutter.dart';
+import 'package:chess_game/profile_page.dart';
 import 'package:chess_game/setting_page.dart';
 import 'package:chess_game/splash_screen.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_core/firebase_core.dart';
-
+import 'firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
@@ -17,8 +19,6 @@ import 'engine/game_logic.dart';
 import 'engine/game_screen.dart';
 import 'engine/game_screen2.dart';
 import 'engine/resume_screen.dart';
-import 'engine/timer.dart';
-import 'firebase_options.dart';
 import 'package:camera/camera.dart';
 
 const kWebRecaptchaSiteKey = "AIzaSyBYsklEXh8FvrcDuxX1c6GzwKz3SmSZuo4";
@@ -26,10 +26,12 @@ const kWebRecaptchaSiteKey = "AIzaSyBYsklEXh8FvrcDuxX1c6GzwKz3SmSZuo4";
 List<CameraDescription> cameras = [];
 Future<void> main() async {
 
-  GetIt.instance.registerSingleton<GameLogic>(GameLogicImplementation(), signalsReady: true);
+ // GetIt.instance.registerSingleton<GameLogic>(GameLogicImplementation(), signalsReady: true);
 
   WidgetsFlutterBinding.ensureInitialized();
   cameras = await availableCameras();
+
+  Admob.initialize();
   SystemChrome.setPreferredOrientations(
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]
   );
@@ -85,15 +87,14 @@ class MyApp extends StatelessWidget {
          home: const Splashscreen(),
            //  initialRoute: '/',
              routes: {
-              // '/': (context) => const HomeScreen2(),
-               '/difficulty': (context) => const ChooseDifficultyScreen(),
-               '/color': (context) => const ChooseColorScreen(),
-               '/resume': (context) => const ResumeScreen(),
-               '/game': (context) => const GameScreen(),
-               "/clock":(context)=>  const ClockWidget(),
-               '/color2': (context) => const ChooseColorScreen2(),
-               '/game2': (context) => const GameScreen2(),
-               '/difficulty2': (context) => const ChooseDifficultyScreen2(),
+              // // '/': (context) => const HomeScreen2(),
+              //  '/difficulty': (context) => const ChooseDifficultyScreen(),
+              //  '/color': (context) => const ChooseColorScreen(),
+              //  '/resume': (context) => const ResumeScreen(),
+              //  '/game': (context) => const GameScreen(),
+              //  '/color2': (context) => const ChooseColorScreen2(),
+              //  '/game2': (context) => const GameScreen2(),
+              //  '/difficulty2': (context) => const ChooseDifficultyScreen2(),
              }
         // routes: {
         // "/Play Local":(context)=>PlayLocal(),

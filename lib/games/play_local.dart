@@ -154,7 +154,7 @@ class _PlayLocalState extends State<PlayLocal> {
                               //borderColor: color.navy,
                               // blurColor: color.beige2,
                               onTap: () {
-                                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> TimerOptionPage()));
+                              //  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> TimerOptionPage()));
                                 // _textController1;_textController2;
                                 // logic.args.isMultiplayer = true;
                                 // Navigator.pushNamed(context, '/color');
@@ -285,7 +285,7 @@ class _PlayLocalState extends State<PlayLocal> {
                               // blurColor: color.beige2,
                               onTap: () {
                                 logic.args.isMultiplayer = false;
-                                Navigator.pushNamed(context, '/difficulty2');
+                              //  Navigator.pushNamed(context, '/difficulty2');
                                 // EmojiAlert(
                                 //   //alertTitle:  Text("Play with Computer", style:  TextStyle(fontWeight:  FontWeight.bold,color: Colors.orangeAccent)),
                                 //   description:  Column(
