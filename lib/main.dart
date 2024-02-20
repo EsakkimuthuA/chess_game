@@ -1,6 +1,7 @@
 
 import 'package:admob_flutter/admob_flutter.dart';
 import 'package:chess_game/profile_page.dart';
+import 'package:chess_game/screen/home_screen.dart';
 import 'package:chess_game/setting_page.dart';
 import 'package:chess_game/splash_screen.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
@@ -20,6 +21,8 @@ import 'engine/game_screen.dart';
 import 'engine/game_screen2.dart';
 import 'engine/resume_screen.dart';
 import 'package:camera/camera.dart';
+
+import 'gift_page.dart';
 
 const kWebRecaptchaSiteKey = "AIzaSyBYsklEXh8FvrcDuxX1c6GzwKz3SmSZuo4";
     //'AIzaSyAlQloKdaZyZ07q653fAWogE1swGdohGzA';
@@ -75,7 +78,12 @@ class MyApp extends StatelessWidget {
   //  GetIt.instance.registerSingleton<GameLogic>(GameLogicImplementation(), signalsReady: true);
     return  GestureDetector(
         onTap: ()=>FocusManager.instance.primaryFocus?.unfocus(),
-       child:GetMaterialApp(
+        child: ChangeNotifierProvider(
+        create: (_) => RewardAmountProvider(),
+        child: ChangeNotifierProvider(
+        create: (context) => ProfileProvider(),
+
+        child:GetMaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Flutter Demo',
         theme: ThemeData(
@@ -107,7 +115,7 @@ class MyApp extends StatelessWidget {
         //"/mobiles": (context)=>MobilesPage(),
        // "/laptops": (context)=>LaptopsPage(),
     //  },
-       )
+        ) ))
     );
   }
 }

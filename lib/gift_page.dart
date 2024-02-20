@@ -1,27 +1,101 @@
-import 'package:flutter/foundation.dart';
+import 'dart:async';
+import 'package:chess_game/screen/home_screen.dart';
+import 'package:chess_game/screen/homepage.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:admob_flutter/admob_flutter.dart';
 import 'dart:math';
 import 'package:flutter/services.dart';
+import 'package:chess_game/colors.dart';
+import 'package:provider/provider.dart';
+import 'package:reward_popup/reward_popup.dart';
 
-class NewPage extends StatelessWidget {
+// class RewardAmountProvider extends ChangeNotifier {
+//   int _totalRewardAmount = 100;
+//
+//   int get totalRewardAmount => _totalRewardAmount;
+//
+//   void updateRewardAmount(int amount) {
+//     _totalRewardAmount += amount;
+//     notifyListeners();
+//   }
+// }
+
+class NewPage extends StatefulWidget {
   final String title;
-
+  final int totalRewardAmount; // Add this field
   const NewPage({
     Key? key,
-    required this.title,
+    required this.title, required this.totalRewardAmount,
   }) : super(key: key);
 
+  @override
+  State<NewPage> createState() => _NewPageState();
+}
+
+class _NewPageState extends State<NewPage> {
+  late AdmobInterstitial _admobInterstitial;
+  late AdmobReward _admobReward;
+  @override
+  void initState(){
+    _admobInterstitial = createAdvert();
+    _admobReward = createReward();
+    super.initState();
+  }
+  AdmobReward createReward() {
+    return AdmobReward(
+      adUnitId: "ca-app-pub-3940256099942544/5224354917",
+      listener: (AdmobAdEvent event, Map<String, dynamic>? args) {
+        if (event == AdmobAdEvent.loaded) {
+          _admobReward.show();
+        } else if (event == AdmobAdEvent.closed) {
+          _admobReward.dispose();
+        } else if (event == AdmobAdEvent.rewarded) {
+          print("type: ${args?["type"]}");
+          print("reward: ${args?["amount"]}");
+        }
+      },
+    );
+  }
+  AdmobInterstitial createAdvert() {
+    return AdmobInterstitial(
+      adUnitId: "ca-app-pub-3940256099942544/2247696110",
+      //"ca-app-pub-3940256099942544/1033173712",
+      listener: (AdmobAdEvent event, Map<String, dynamic>? args) {
+        if (event == AdmobAdEvent.loaded) {
+          _admobInterstitial.show();
+        } else if (event == AdmobAdEvent.closed) {
+          _admobInterstitial.dispose();
+        }
+      },
+    );
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: Text(title),
+          title: Text(widget.title),
           systemOverlayStyle: SystemUiOverlayStyle.light
       ).withBottomAdmobBanner(context),
-      body: Container(
-        color: Colors.green,
+      body: Column(
+        children: [
+          Container(
+            color: Colors.green,
+            child: Text('Total Reward Amount: ${widget.totalRewardAmount}'),
+            
+          ),
+          MaterialButton(
+              onPressed: ()=>_admobInterstitial.load(),
+            child: Text('AdmobInterstitial'),
+
+          ),
+          MaterialButton(
+            onPressed: ()=> _admobReward.load(),
+            child: Text('AdmobReward'),
+
+          )
+        ],
       ),
     );
   }
@@ -33,17 +107,22 @@ class GiftPage extends StatefulWidget {
   State<GiftPage> createState() => _GiftPageState();
 }
 
-class _GiftPageState extends State<GiftPage> {
+class _GiftPageState extends State<GiftPage>  with WidgetsBindingObserver{
   GlobalKey<ScaffoldState> scaffoldState = GlobalKey();
   AdmobBannerSize? bannerSize;
   late AdmobInterstitial interstitialAd;
   late AdmobReward rewardAd;
-
+  int totalRewardAmount = 0;
+  int rewardedCount = 0;
+  late Timer dailyRewardedTimer;
   @override
   void initState() {
     super.initState();
-
-    // You should execute `Admob.requestTrackingAuthorization()` here before showing any ad.
+    dailyRewardedTimer = Timer.periodic(Duration(days: 1), (timer) {
+      setState(() {
+        rewardedCount = 0; // Reset rewarded count daily
+      });
+    });
 
     bannerSize = AdmobBannerSize.BANNER;
 
@@ -62,54 +141,99 @@ class _GiftPageState extends State<GiftPage> {
         handleEvent(event, args, 'Reward');
       },
     );
-
     interstitialAd.load();
     rewardAd.load();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+    await Future.delayed(Duration(seconds: 5)); // Delay for 1 second before showing the ad
+    showInterstitialAd();
+    });
   }
 
-  void handleEvent(
-      AdmobAdEvent event, Map<String, dynamic>? args, String adType) {
+  @override
+  void dispose() {
+    dailyRewardedTimer.cancel();
+    interstitialAd.dispose();
+    rewardAd.dispose();
+    super.dispose();
+  }
+
+  void showInterstitialAd() async {
+    final isLoaded = await interstitialAd.isLoaded;
+    if (isLoaded ?? false) {
+      interstitialAd.show();
+    }
+  }
+
+  Future<void> handleEvent(
+      AdmobAdEvent event, Map<String, dynamic>? args, String adType) async {
     switch (event) {
       case AdmobAdEvent.loaded:
+        setState(() {});
         showSnackBar('New Admob $adType Ad loaded!');
         break;
       case AdmobAdEvent.opened:
+        setState(() {});
         showSnackBar('Admob $adType Ad opened!');
         break;
       case AdmobAdEvent.closed:
+        setState(() {});
         showSnackBar('Admob $adType Ad closed!');
         break;
       case AdmobAdEvent.failedToLoad:
+        setState(() {});
         showSnackBar('Admob $adType failed to load. :(');
         break;
       case AdmobAdEvent.rewarded:
+      //  if (rewardedCount < 3) {
         final int customRewardAmount = 100;
-        showDialog(
-          context: scaffoldState.currentContext!,
-          builder: (BuildContext context) {
-            return WillPopScope(
-              onWillPop: () async {
-                ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                return true;
-              },
-              child: AlertDialog(
-                content: Column(
+        totalRewardAmount += customRewardAmount;
+        setState(() {});
+        await Future.delayed(const Duration(seconds: 3)).then((value) {
+          showRewardPopup(
+            context,
+            enableDismissByTappingOutside: true,
+            child: AlertDialog(
+              backgroundColor: color.blue, // Change background color
+              shape: RoundedRectangleBorder(
+                side: BorderSide(
+                  color: Colors.black,
+                  width: 20,
+                ),
+                borderRadius: BorderRadius.circular(10.0),
+
+              ),
+              content: Container(
+                width: 300,
+                height: 200,
+                decoration: BoxDecoration(
+                  color: color.blue,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                      color: color.navy.withOpacity(0.55), width: 10.0
+                    //   bottom: BorderSide(color: color.navy1, width: 3.0), // Set the border color and width for the bottom side
+                  ),
+                ),
+                child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
-                    Text('Reward callback fired. Thanks Andrew!'),
-                    Text('Type: ${args!['type']}'),
-                    Text('Amount: $customRewardAmount'),
-                   // Text('Amount: ${args['amount']}'),
+                    Text('Reward callback fired. Thanks Andrew!',
+                        style: GoogleFonts.oswald(fontWeight: FontWeight.w500,color: Colors.purple)),
+                    Text('Type: ${args!['type']}',style: GoogleFonts.oswald(fontWeight: FontWeight.w500,color: Colors.purple)),
+                    Text('Amount: $customRewardAmount',style: GoogleFonts.oswald(fontWeight: FontWeight.w500,color: Colors.purple)),
+                    // Text('Amount: ${args['amount']}'),
                   ],
                 ),
               ),
-            );
-          },
-        );
+            ),
+          );
+        });
+        //rewardedCount++;
+    //   }
         break;
       default:
     }
   }
+
 
   void showSnackBar(String content) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -122,24 +246,27 @@ class _GiftPageState extends State<GiftPage> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.blueGrey,
-      ),
-      home: Builder(
-        builder: (BuildContext context) => Scaffold(
-          key: scaffoldState,
-          appBar: AppBar(
-            title: const Text('AdmobFlutter'),
+    double screenHeight = MediaQuery.of(context).size.height;
+    double screenWidth = MediaQuery.of(context).size.width;
+    //final rewardProvider = Provider.of<RewardAmountProvider>(context);
+    return Scaffold(
+             key: scaffoldState,
+             appBar: AppBar(
+             title: const Text('Free Coins'),
+            // leading: BackButton(
+            //   onPressed: ()async{
+            //     Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>HomeScreen()));
+            //   },
+            // ),
             actions: [
               TextButton(
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      fullscreenDialog: true,
+                onPressed: () async {
+                  // Run this before displaying any ad.
+                  Navigator.of(context).push(MaterialPageRoute(fullscreenDialog: true,
                       builder: (BuildContext context) {
-                        return NewPage(title: 'Full Screen Dialog');
+                        return NewPage(
+                          title: 'Full Screen Dialog',
+                          totalRewardAmount: totalRewardAmount,);
                       },
                     ),
                   );
@@ -148,293 +275,123 @@ class _GiftPageState extends State<GiftPage> {
                   'FullscreenDialog',
                   style: TextStyle(
                     color: Colors.blue,
+
                   ),
                 ),
               )
             ],
-          ), // .withBottomAdmobBanner(context),
-          bottomNavigationBar: Builder(
-            builder: (BuildContext context) {
-              return Container(
-                color: Colors.blueGrey,
-                child: SafeArea(
-                  child: SizedBox(
-                    height: 60,
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Expanded(
-                          child: TextButton(
-                            onPressed: () async {
-                              final isLoaded = await interstitialAd.isLoaded;
-                              if (isLoaded ?? false) {
-                                interstitialAd.show();
-                              } else {
-                                showSnackBar(
-                                    'Interstitial ad is still loading...');
-                              }
-                            },
-                            child: Text(
-                              'Show Interstitial',
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: TextButton(
-                            onPressed: () async {
-                              if (await rewardAd.isLoaded) {
-                                rewardAd.show();
-                              } else {
-                                showSnackBar('Reward ad is still loading...');
-                              }
-                            },
-                            child: Text(
-                              'Show Reward',
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: PopupMenuButton(
-                            initialValue: bannerSize,
-                            offset: Offset(0, 20),
-                            onSelected: (AdmobBannerSize newSize) {
-                              setState(() {
-                                bannerSize = newSize;
-                              });
-                            },
-                            itemBuilder: (BuildContext context) =>
-                            <PopupMenuEntry<AdmobBannerSize>>[
-                              PopupMenuItem(
-                                value: AdmobBannerSize.BANNER,
-                                child: Text('BANNER'),
-                              ),
-                              PopupMenuItem(
-                                value: AdmobBannerSize.LARGE_BANNER,
-                                child: Text('LARGE_BANNER'),
-                              ),
-                              PopupMenuItem(
-                                value: AdmobBannerSize.MEDIUM_RECTANGLE,
-                                child: Text('MEDIUM_RECTANGLE'),
-                              ),
-                              PopupMenuItem(
-                                value: AdmobBannerSize.FULL_BANNER,
-                                child: Text('FULL_BANNER'),
-                              ),
-                              PopupMenuItem(
-                                value: AdmobBannerSize.LEADERBOARD,
-                                child: Text('LEADERBOARD'),
-                              ),
-                              PopupMenuItem(
-                                value: AdmobBannerSize.SMART_BANNER(context),
-                                child: Text('SMART_BANNER'),
-                              ),
-                              PopupMenuItem(
-                                value: AdmobBannerSize.ADAPTIVE_BANNER(
-                                  width: MediaQuery.of(context)
-                                      .size
-                                      .width
-                                      .toInt() -
-                                      40, // considering EdgeInsets.all(20.0)
-                                ),
-                                child: Text('ADAPTIVE_BANNER'),
-                              ),
-                            ],
-                            child: Center(
-                              child: Text(
-                                'Banner size',
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.white),
-                              ),
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: TextButton(
-                            onPressed: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                    builder: (BuildContext context) {
-                                      return NewPage(
-                                        title: 'Push Page',
-                                      );
-                                    }),
-                              );
-                            },
-                            child: Text(
-                              'Push Page',
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ),
-                        ),
-                      ],
+          ).withBottomAdmobBanner(context),
+              body: Column(
+                children: [
+                  Container(
+                  height: screenHeight/10,
+                  width: screenHeight/1,
+                  decoration: BoxDecoration(
+                  color: color.Brown,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                      color: color.navy.withOpacity(0.55), width: 10.0
+                    //   bottom: BorderSide(color: color.navy1, width: 3.0), // Set the border color and width for the bottom side
                     ),
-                  ),
-                ),
-              );
-            },
-          ),
-          body: Column(
-            children: [
-              Container(
-                height: 100,
-                width: 400,
-                decoration: BoxDecoration(
-                  color: Colors.blue,
-
-                ),
-                child: Row(
+                       ),
+                  child: Row(
                   children: [
                     SizedBox(width: 30,),
-                    Text('1   '),
-                    Text('100    '),
+                   // Text('1   '),
+                    Text('100    ',style: TextStyle(color: Colors.white,fontSize: 20,fontWeight: FontWeight.bold),),
                     Image(image: AssetImage('assets/coin4.png'),height: 50,width: 50,),
                     SizedBox(width: 30,),
-                    TextButton(
+                    MaterialButton(
+                      color: Colors.green,
                       onPressed: () async {
                         if (await rewardAd.isLoaded) {
+                         if (rewardedCount < 3) {
                           rewardAd.show();
+                          rewardedCount++;
+                        }else{
+                         SnackBar(content: Text('your daily reward complete'),);
+                         }
                         } else {
                           showSnackBar('Reward ad is still loading...');
                         }
                       },
-                      child: Text(
-                        'Show Reward',
-                        style: TextStyle(color: Colors.black),
+                      child: Row(
+                        children: [
+                          Text(
+                            'Reward Collect',
+                            style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 20),
+                          ),
+                          Image(image: AssetImage('assets/arrowf1.png'),height: 30,width: 35,color: Colors.white,),
+                          //Icon(Icons.video_library_outlined,size: 30,color: Colors.green,)
+                        ],
                       ),
                     ),
                   ],
                 ),
               ),
-              Expanded(
-                child: TextButton(
-                  onPressed: () async {
-                    final isLoaded = await interstitialAd.isLoaded;
-                    if (isLoaded ?? false) {
-                      interstitialAd.show();
-                    } else {
-                      showSnackBar(
-                          'Interstitial ad is still loading...');
-                    }
-                  },
-                  child: Text(
-                    'Show Interstitial',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
-              ),
-              Expanded(
-                child: Scrollbar(
-                  child: ListView.builder(
-                    padding: EdgeInsets.all(20.0),
-                    itemCount: 6,
-                    itemBuilder: (BuildContext context, int index) {
-                      if (index != 0 && index % 2 == 0) {
-                        return Column(
-                          children: <Widget>[
-                            Container(
-                              margin: EdgeInsets.only(bottom: 20.0),
-                              child: AdmobBanner(
-                                adUnitId: getBannerAdUnitId()!,
-                                adSize: bannerSize!,
-                                listener: (AdmobAdEvent event,
-                                    Map<String, dynamic>? args) {
-                                  handleEvent(event, args, 'Banner');
-                                },
-                                onBannerCreated:
-                                    (AdmobBannerController controller) {
-                                  // Dispose is called automatically for you when Flutter removes the banner from the widget tree.
-                                  // Normally you don't need to worry about disposing this yourself, it's handled.
-                                  // If you need direct access to dispose, this is your guy!
-                                  // controller.dispose();
-                                },
-                              ),
-                            ),
-                            Container(
-                              height: 100.0,
-                              margin: EdgeInsets.only(bottom: 20.0),
-                              color: Colors.cyan,
-                            ),
-                          ],
+                  ElevatedButton(
+                    onPressed: () async {
+                      await showRewardPopup(
+                        context,
+                        enableDismissByTappingOutside: true,
+                        child: const Positioned.fill(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text('Coupon Code'),
+                              Text('Reach out to redeem'),
+                              Text('abcd xyz'),
+                            ],
+                          ),
+                        ),
+                      );
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text("Popup dismissed"),
+                          ),
                         );
                       }
-                      return Container(
-                        height: 100.0,
-                        margin: EdgeInsets.only(bottom: 20.0),
-                        color: Colors.cyan,
-                      );
+                    },
+                    child: const Text('Pop-up example four'),
+                  ),
+                  Container(
+                   height: 50,
+                    width: 200,
+                   color: Colors.blue,
+                   child: TextButton(
+                    onPressed: () async {
+                      final isLoaded = await interstitialAd.isLoaded;
+                      if (isLoaded ?? false) {
+                        interstitialAd.show();
+                      } else {
+                        showSnackBar(
+                            'Interstitial ad is still loading...');
+                      }
+                    },
+                    child: Text(
+                      'Show Interstitial',
+                      style: TextStyle(color: Colors.black),
+                    ),
+                  ),
+              ),
+                  AdmobBanner(
+                    adUnitId: getBannerAdUnitId()!,
+                    adSize: bannerSize!,
+                    listener: (AdmobAdEvent event,
+                        Map<String, dynamic>? args) {
+                      handleEvent(event, args, 'Banner');
+                    },
+                    onBannerCreated:
+                        (AdmobBannerController controller) {
                     },
                   ),
-                ),
-              ),
-              // Another option is to fix a banner ad to the top or bottom of your content.
-              // Notice that banners are not scrolling, which is a violation of admob policy.
-              //
-              // See: https://github.com/kmcgill88/admob_flutter/issues/194
-              // "banner ads should not move as a user scrolls, as users may try to
-              // click on the menu but end up clicking on the ad accidentally instead.
-              // This specific implementation is against policy and we reserve the right
-              // to disable ad serving to your app."
-
-              // Builder(
-              //   builder: (BuildContext context) {
-              //     final size = MediaQuery.of(context).size;
-              //     final height = max(size.height * .05, 50.0);
-              //     return Container(
-              //       width: size.width,
-              //       height: height,
-              //       child: AdmobBanner(
-              //         adUnitId: getBannerAdUnitId(),
-              //         adSize: AdmobBannerSize.ADAPTIVE_BANNER(
-              //           width: size.width.toInt(),
-              //         ),
-              //         listener: (AdmobAdEvent event, Map<String, dynamic> args) {
-              //           handleEvent(event, args, 'Banner');
-              //         },
-              //       ),
-              //     );
-              //   },
-              // ),
             ],
           ),
-        ),
-      ),
-    );
-    // .withBottomAdmobBanner(context);
-  }
-
-  @override
-  void dispose() {
-    interstitialAd.dispose();
-    rewardAd.dispose();
-    super.dispose();
+    );// .withBottomAdmobBanner(context);
   }
 }
 
-/*
-Test Id's from:
-https://developers.google.com/admob/ios/banner
-https://developers.google.com/admob/android/banner
-
-App Id - See README where these Id's go
-Android: ca-app-pub-3940256099942544~3347511713
-iOS: ca-app-pub-3940256099942544~1458002511
-
-Banner
-Android: ca-app-pub-3940256099942544/6300978111
-iOS: ca-app-pub-3940256099942544/2934735716
-
-Interstitial
-Android: ca-app-pub-3940256099942544/1033173712
-iOS: ca-app-pub-3940256099942544/4411468910
-
-Reward Video
-Android: ca-app-pub-3940256099942544/5224354917
-iOS: ca-app-pub-3940256099942544/1712485313
-*/
 
 String? getBannerAdUnitId() {
   if (Platform.isIOS) {
@@ -606,7 +563,6 @@ extension MaterialAppX on MaterialApp {
       child: this,
     );
   }
-}
+ }
 
 
-/////////////////////////

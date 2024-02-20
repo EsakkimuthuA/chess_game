@@ -350,13 +350,19 @@ class _SignUpState extends State<SignUp> {
                                 final email = emailController.text;
                                 final mobile = mobileController.text;
                                 final password = passwordController.text;
-                                try {
-                                  await validate(
-                                      context, name, email, mobile, password,);
-                                  // Handle successful registration here
-                                } catch (e) {
-                                  // Handle error (e.g., show an error message)
-                                  print('Error during registration: $e');
+                                String imagePath = '';
+                                    //'assets/placeholder_image.png';
+                                if (name.isNotEmpty && email.isNotEmpty && mobile.isNotEmpty && password.isNotEmpty) {
+                                  try {
+                                    await validate(context, name, email, mobile, password, imagePath);
+                                    // Handle successful registration here
+                                  } catch (e) {
+                                    // Handle error (e.g., show an error message)
+                                    print('Error during registration: $e');
+                                  }
+                                } else {
+                                  // Handle empty input fields (e.g., show an error message)
+                                  print('All fields are required');
                                 }
                                 //final result =
                                 // await addusers1(name,email,mobile,password);

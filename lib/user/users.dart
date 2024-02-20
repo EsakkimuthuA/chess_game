@@ -8,22 +8,22 @@ String welcomeToJson(List<Users> data) =>
 
 class Users {
  // String id;
-  String userid;
+  String userId;
   String name;
   String email;
   String mobile;
   String password;
   String sessionToken;
-  String imagepath;
+  String imagePath;
   Users({
     //required this.id,
-    required this.userid,
+    required this.userId,
     required this.name,
     required this.email,
     required this.mobile,
     required this.password,
     required this.sessionToken,
-     required this.imagepath,
+     required this.imagePath,
   });
 
   factory Users.fromJson(Map<String, dynamic> json) => Users(
@@ -33,23 +33,24 @@ class Users {
     // password: json["password"],
     // sessionToken: json["session_token"]
    // id: json["id"],
-    userid: json["user_id"] ?? "",
+    userId: json["user_id"] ?? "",
     name: json["name"] ?? "",
     email: json["email"] ?? "",
     mobile: json["mobile"] ?? "",
     password: json["password"] ?? "",
     sessionToken: json["session_token"] ?? "",
-    imagepath: json["image_path"] ?? "",
+    imagePath: json["image_path"] ?? "",
   );
 
   Map<String, dynamic> toJson() => {
    // "id":id,
-    "user_id": userid,
+    "user_id": userId,
     "name": name,
     "email": email,
     "mobile": mobile,
     "password": password,
     "session_token":sessionToken,
-    "image_path":imagepath,
+    "image_path":imagePath,
   };
 }
+

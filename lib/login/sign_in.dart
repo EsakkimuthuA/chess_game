@@ -105,6 +105,7 @@ class _SignInState extends State<SignIn> {
       // Handle any exceptions or errors that occur during the HTTP request.
       print('Error: Email Error : $e');
     }
+    return null;
     // Future<void> saveSessionTokenLocally(String sessionToken) async {
     //   SharedPreferences prefs = await SharedPreferences.getInstance();
     //   prefs.setString('sessionToken', sessionToken);
@@ -144,10 +145,10 @@ class _SignInState extends State<SignIn> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
-                SizedBox(height: screenHeight/20,),
-                Align(
-                    alignment: Alignment.topLeft,
-                    child: BackButton(color: Colors.white,)),
+                SizedBox(height: screenHeight/10,),
+                // Align(
+                //     alignment: Alignment.topLeft,
+                //     child: BackButton(color: Colors.white,)),
                 Padding(
                   padding:  EdgeInsets.only(top: screenHeight/20),
                         child: Image(image: AssetImage('assets/LC-logo1.png'),height: screenHeight/15,width: screenWidth/8,),

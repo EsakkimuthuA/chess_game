@@ -48,8 +48,7 @@ class _SettingPageState extends State<SettingPage> {
     const User(username: 'sounds', icon: Icons.surround_sound_rounded),
     const User(username: 'Rate this app', icon: Icons.star_rate),
   ];
-  signOutUser() async
-  {
+  signOutUser() async {
     var resultResponse = await Get.dialog(
         AlertDialog(
           backgroundColor: Colors.grey,

@@ -1,5 +1,7 @@
 
 import  'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
@@ -7,115 +9,109 @@ import 'dart:convert';
 import '../user/users.dart';
 
 
-Future<Users?>validate(
+Future<Users?> validate(
     BuildContext context,
-    String name,
-    String email,
-    String mobile,
-    String password,
+    String? name,
+    String? email,
+    String? mobile,
+    String? password,
+    String? imagePath,
     ) async {
   try {
     var uri = Uri.parse('https://leadproduct.000webhostapp.com/chessApi/validate.php');
     var response = await http.post(uri, body: {
       "email": email,
     });
+
     if (response.statusCode == 200) {
       var userJson = json.decode(response.body);
-      if(userJson['emailFound'] == true){
+      if (userJson['emailFound'] == true) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             backgroundColor: Colors.deepOrange,
-            content: Text('Email already exist'),
+            content: Text('Email already exists'),
           ),
         );
-       /* Fluttertoast.showToast(
-            msg: 'Email already exist',
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.CENTER,
-            timeInSecForIosWeb: 1,
-            backgroundColor: Colors.deepOrange,
-            textColor: Colors.white,
-            fontSize: 16.0
-        );*/
-      }else{
+        return null;
+      } else {
+        // Proceed with user registration
         var sessionToken = generateUniqueToken();
         SharedPreferences prefs = await SharedPreferences.getInstance();
         prefs.setString('sessionToken', sessionToken);
-        var uri = Uri.parse('https://leadproduct.000webhostapp.com/chessApi/signup.php');
-        var response = await http.post(uri, body: {
+        var signupUri = Uri.parse('https://leadproduct.000webhostapp.com/chessApi/signup.php');
+        var signupResponse = await http.post(signupUri, body: {
           "name": name,
           "email": email,
           "mobile": mobile,
           "password": password,
           "session_token": sessionToken,
+          "image_path": imagePath
         });
-
-        if (response.statusCode == 201) {
-          var userJson = json.decode(response.body);
-           print('error code');
-          try {
-            var user = Users.fromJson(userJson);
-            print(user);
-            showRegistrationSuccessMessage(context);
-            return user;
-          } catch (e) {
-            print(response.body);
-            print(response.statusCode);
-            throw Exception('Failed to add user');
-          }
-        }else{
+        if (signupResponse.statusCode == 201) {
+          var userJson = json.decode(signupResponse.body);
+          var user = Users.fromJson(userJson);
           showRegistrationSuccessMessage(context);
+          return user;
+        } else {
+          var errorJson = json.decode(signupResponse.body);
+          var errorMessage = errorJson['error'];
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: Colors.red,
+              content: Text(errorMessage),
+            ),
+          );
+          return null;
         }
       }
-    } else{
+    } else if (response.statusCode == 404) {
+      // Email not found in validation, proceed with registration
       var sessionToken = generateUniqueToken();
       SharedPreferences prefs = await SharedPreferences.getInstance();
       prefs.setString('sessionToken', sessionToken);
-      var uri = Uri.parse('https://leadproduct.000webhostapp.com/chessApi/signup.php');
-      var response = await http.post(uri, body: {
+      var signupUri = Uri.parse('https://leadproduct.000webhostapp.com/chessApi/signup.php');
+      var signupResponse = await http.post(signupUri, body: {
         "name": name,
         "email": email,
         "mobile": mobile,
         "password": password,
         "session_token": sessionToken,
+        "image_path": imagePath
       });
-
-      if (response.statusCode == 201) {
-        var userJson = json.decode(response.body);
-        print('error code');
-        try {
-          var user = Users.fromJson(userJson);
-          print(user);
-          showRegistrationSuccessMessage(context);
-          return user;
-        } catch (e) {
-          print(response.body);
-          print(response.statusCode);
-          throw Exception('Failed to add user');
-        }
-      }else{
+      if (signupResponse.statusCode == 201) {
+        var userJson = json.decode(signupResponse.body);
+        var user = Users.fromJson(userJson);
         showRegistrationSuccessMessage(context);
+        return user;
+      } else {
+        var errorJson = json.decode(signupResponse.body);
+        var errorMessage = errorJson['error'];
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: Colors.red,
+            content: Text(errorMessage),
+          ),
+        );
+        return null;
       }
+    } else {
+      throw Exception('Failed to validate email: ${response.statusCode}');
     }
-
-  }catch(e){
-    print(e);
-    print(e.toString());
+  } catch (e) {
+    // print('Error: $e');
+    print('Error during registration: $e');
+    showRegistrationMessage(context);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         backgroundColor: Colors.deepOrange,
         content: Text('An error occurred. Please try again later.'),
       ),
     );
-    // Fluttertoast.showToast(
-    //   msg: 'An error occurred. Please try again later.',
-    //   toastLength: Toast.LENGTH_SHORT,
-    //   gravity: ToastGravity.BOTTOM,
-    //   backgroundColor: Colors.red,
-    //   textColor: Colors.white,
-    // );
+    return null;
   }
 }
+
+
 void showRegistrationSuccessMessage(BuildContext context) {
   ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(
@@ -123,14 +119,6 @@ void showRegistrationSuccessMessage(BuildContext context) {
       content: Text('Registration Successful'),
     ),
   );
-  // Fluttertoast.showToast(
-  //   msg: 'Registration Successful',
-  //   toastLength: Toast.LENGTH_SHORT,
-  //   gravity: ToastGravity.BOTTOM,
-  //   backgroundColor: Colors.green,
-  //   textColor: Colors.white,
-  // );
-// Navigator.push(context, MaterialPageRoute(builder: (context) => EmailPage()));
 }
 
 String generateUniqueToken() {
@@ -138,9 +126,15 @@ String generateUniqueToken() {
   return uuid.v4();
 }
 
-
-
-
+Future<bool?> showRegistrationMessage(BuildContext context){
+  return Fluttertoast.showToast(
+  msg: 'Registration successful',
+  toastLength: Toast.LENGTH_SHORT,
+  gravity: ToastGravity.CENTER,
+  backgroundColor: Colors.red,
+  textColor: Colors.white,
+  );
+}
 
 Future<Users?> addusers1(
     String name,
@@ -178,3 +172,108 @@ Future<Users?> addusers1(
     throw Exception('Unknown Error: Failed to add user');
   }
 }
+
+
+//
+// Future<Users?>validate(
+//     BuildContext context,
+//     String name,
+//     String email,
+//     String mobile,
+//     String password,
+//     ) async {
+//   try {
+//     var uri = Uri.parse('https://leadproduct.000webhostapp.com/chessApi/validate.php');
+//     var response = await http.post(uri, body: {
+//      // "name": name,
+//       "email": email,
+//       //"mobile": mobile,
+//       //"password": password,
+//     });
+//
+//     if (response.statusCode == 200) {
+//       var userJson = json.decode(response.body);
+//       if(userJson['emailFound'] == true){
+//         ScaffoldMessenger.of(context).showSnackBar(
+//           SnackBar(
+//             backgroundColor: Colors.deepOrange,
+//             content: Text('Email already exist'),
+//           ),
+//         );
+//         return null;
+//       }
+//       else{
+//         var sessionToken = generateUniqueToken();
+//         SharedPreferences prefs = await SharedPreferences.getInstance();
+//         prefs.setString('sessionToken', sessionToken);
+//         var uri = Uri.parse('https://leadproduct.000webhostapp.com/chessApi/signup.php');
+//         var response = await http.post(uri, body: {
+//           "name": name,
+//           "email": email,
+//           "mobile": mobile,
+//           "password": password,
+//           "session_token": sessionToken,
+//         });
+//         print('esakki');
+//         if (response.statusCode == 201) {
+//           var userJson = json.decode(response.body);
+//            print('error code');
+//           try {
+//             var user = Users.fromJson(userJson);
+//             print(user);
+//             showRegistrationSuccessMessage(context);
+//             return user;
+//           } catch (e) {
+//             print(response.body);
+//             print(response.statusCode);
+//             throw Exception('Failed to add user');
+//           }
+//         }else{
+//           throw Exception('Failed to add user');
+//         }
+//       }
+//     }
+//     else if (response.statusCode == 404) {
+//       // Email not found in validation, proceed with registration
+//       var sessionToken = generateUniqueToken();
+//       SharedPreferences prefs = await SharedPreferences.getInstance();
+//       prefs.setString('sessionToken', sessionToken);
+//       var uri = Uri.parse('https://leadproduct.000webhostapp.com/chessApi/signup.php');
+//       var response = await http.post(uri, body: {
+//         "name": name,
+//         "email": email,
+//         "mobile": mobile,
+//         "password": password,
+//         "session_token": sessionToken,
+//       });
+//       if (response.statusCode == 201) {
+//         var userJson = json.decode(response.body);
+//         try {
+//           var user = Users.fromJson(userJson);
+//           showRegistrationSuccessMessage(context);
+//           return user;
+//         } catch (e) {
+//           print(response.body);
+//           print(response.statusCode);
+//           throw Exception('Failed to add user');
+//         }
+//       } else {
+//         print('esakki');
+//         throw Exception('Failed to add user');
+//       }
+//     }
+//     else {
+//       throw Exception('Failed to validate email');
+//     }
+//   } catch(e){
+//     print(e);
+//     print(e.toString());
+//     ScaffoldMessenger.of(context).showSnackBar(
+//       SnackBar(
+//         backgroundColor: Colors.deepOrange,
+//         content: Text('An error occurred. Please try again later.'),
+//       ),
+//     );
+//     return null;
+//   }
+// }

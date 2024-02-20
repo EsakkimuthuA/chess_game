@@ -1,13 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:chess_game/colors.dart';
-class Shop extends StatefulWidget {
+class Shop extends StatelessWidget {
   const Shop({super.key});
 
-  @override
-  State<Shop> createState() => _ShopState();
-}
-
-class _ShopState extends State<Shop> {
   @override
   Widget build(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height;
